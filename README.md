@@ -1,39 +1,226 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# token_theme_kit
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+A Flutter theming package that applies design tokens to generate consistent, scalable Material
+themes across your entire app.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+`token_theme_kit` helps you move away from ad-hoc colors and widget overrides by introducing a *
+*token-driven theming architecture**:
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+> **Design Tokens → ColorScheme → ThemeData → Widgets**
 
-## Features
+---
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+## ✨ Features
 
-## Getting started
+* 🎨 Token-based color system (brand, text, surface, semantic)
+* 🧩 Automatic `ColorScheme` generation from tokens
+* 🌗 Light / Dark theme pairs via a registry
+* 🔤 Pluggable typography registry (fonts as tokens)
+* 🌍 Global access to tokens via `BuildContext`
+* 🧠 Centralized theme & font switching with controller
+* 🧼 Clean, scalable, and Material-friendly API
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+---
 
-## Usage
+## 📦 Installation
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  token_theme_kit: ^0.0.1
 ```
 
-## Additional information
+---
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+## 🚀 Quick Start
+
+### 1. Define color tokens
+
+Create token sets for your themes (example: `forest_tokens.dart`, `sunset_tokens.dart`):
+
+```dart
+
+const forestTokens = AppColorTokensData(
+  brand: BrandColorsData(
+    primary: Color(0xFF2E7D32),
+    secondary: Color(0xFF81C784),
+  ),
+  text: TextColorsData(
+    body: Colors.black87,
+    strong: Colors.black,
+    subtle: Colors.black54,
+    disabled: Colors.black38,
+  ),
+  surface: SurfaceColorsData(
+    background: Color(0xFFF1F8E9),
+    canvas: Colors.white,
+    border: Color(0xFFCBD5C0),
+  ),
+  semantic: SemanticColorsData(
+    success: Colors.green,
+    warning: Colors.orange,
+    danger: Colors.red,
+    info: Colors.blue,
+  ),
+);
+```
+
+---
+
+### 2. Register themes
+
+Create a theme registry that maps IDs → light/dark token pairs:
+
+```dart
+
+final appThemeRegistry = ThemeRegistry<AppThemeId>({
+  AppThemeId.forest: ThemePair(
+    light: forestTokens,
+    dark: forestDarkTokens,
+  ),
+  AppThemeId.sunset: ThemePair(
+    light: sunsetTokens,
+    dark: sunsetDarkTokens,
+  ),
+});
+```
+
+---
+
+### 3. Register fonts
+
+Fonts are also tokens:
+
+```dart
+
+final appFontsRegistry = {
+  AppFontId.inter: AppTypographyTokens.families(
+    fontFamily: 'Inter',
+  ),
+  AppFontId.robotoMono: AppTypographyTokens.families(
+    fontFamily: 'Roboto',
+    monoFamily: 'RobotoMono',
+  ),
+};
+```
+
+---
+
+### 4. Create a theme controller
+
+```dart
+
+final themeController = TokenThemeController<AppThemeId, AppFontId>(
+  themes: appThemeRegistry,
+  fonts: appFontsRegistry,
+  initialTheme: AppThemeId.forest,
+  initialFont: AppFontId.inter,
+);
+```
+
+---
+
+### 5. Wire everything in `main.dart`
+
+```dart
+
+return AnimatedBuilder(
+  animation: themeController,
+  builder: (context, _) {
+    final brightness = themeController.brightness;
+    final tokens = themeController.tokensFor(brightness);
+
+    return TokenScope(
+      tokens: tokens,
+      child: MaterialApp(
+        themeMode: themeController.mode,
+        theme: TokenThemeBuilder.build(
+          tokens: tokens,
+          typography: themeController.typography,
+          brightness: Brightness.light,
+        ),
+        darkTheme: TokenThemeBuilder.build(
+          tokens: tokens,
+          typography: themeController.typography,
+          brightness: Brightness.dark,
+        ),
+        home: const DemoPage(),
+      ),
+    );
+  },
+);
+```
+
+---
+
+## 🧩 Using tokens inside widgets
+
+Access tokens anywhere via `BuildContext`:
+
+```dart
+
+Container(
+  color: context.tokens.surface.canvas,
+  child: Text(
+    'Hello Tokens',
+    style: TextStyle(color: context.tokens.text.strong),
+  ),
+);
+```
+
+You can also access the generated Material `ColorScheme`:
+
+```dart
+
+final scheme = context.scheme;
+```
+
+---
+
+## 🎛 Theme & Font Switching
+
+From anywhere (e.g. demo page):
+
+```dart
+
+themeController.setTheme(AppThemeId.sunset);
+themeController.toggleMode();
+themeController.setFont(AppFontId.robotoMono);
+
+```
+
+All widgets update automatically.
+
+---
+
+## 🧠 Why token_theme_kit?
+
+Flutter’s default theming:
+
+* Encourages widget-level overrides
+* Becomes hard to scale
+* Makes design systems difficult to enforce
+
+`token_theme_kit`:
+
+* Centralizes visual decisions
+* Scales across large apps
+* Matches how modern design systems work
+* Keeps Material theming intact
+
+---
+
+## 🛣 Roadmap
+
+* More Material component coverage (checkbox, switch, nav, tabs)
+* Prebuilt `TokenThemeApp` wrapper
+* Better dark-mode token derivations
+* Persistence helpers (Hive / SharedPreferences)
+* Documentation site
+
+---
+
+## 🧑‍💻 Author
+
+Built with ❤️ by a Flutter developer who got tired of fighting ThemeData.
+
+---

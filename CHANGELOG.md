@@ -1,3 +1,4 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release: design tokens → ColorScheme → ThemeData builder, with TokenScope +
+  ThemeController utilities.
