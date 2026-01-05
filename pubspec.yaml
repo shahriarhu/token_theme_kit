@@ -1,7 +1,9 @@
 name: token_theme_kit
 description: "A Flutter theming package that applies design tokens to generate consistent, scalable Material themes across your entire app."
 version: 0.0.1
-homepage:
+
+repository: https://github.com/shahriarhu/token_theme_kit
+homepage: https://github.com/shahriarhu/token_theme_kit
 
 environment:
   sdk: ^3.10.4
